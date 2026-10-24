@@ -13,11 +13,25 @@ The initial MIPI SPI configuration produced scrambled pixels at both 90° and 27
 
 Readings come from `sensor.desk_temperature` and `sensor.desk_humidity`. Temperature uses the entity's `unit_of_measurement`: Fahrenheit is converted to Celsius; unknown units are not guessed. Unavailable readings show `--`. When no Home Assistant state subscriber is connected, both readings show `--` and the screen shows `HA offline`. Buttons send scene requests, not confirmations of the lights' state.
 
+## Rounded UI
+
+The interface has two reading cards, larger readings, muted captions, rounded scene buttons, and lightbulb icons. Touch boxes and scene mappings are unchanged. A short white outline acknowledges a tap; it does not indicate the active scene or successful execution. The feedback script restarts on a new tap and clears the outline after 350 ms plus rendering time.
+
+Keep `color_palette: 8BIT`: an adaptive palette took about 2.6 seconds per redraw, and a 16-bit framebuffer failed allocation on this device. Both experiments were removed. The restored RGB332 mode reports no allocation failure, Home Assistant reconnects, and one observed redraw took 296 ms. Brent confirmed the rounded interface looks good and works on the device.
+
+To generate an approximate preview from the tested drawing lambda after compiling:
+
+```sh
+CYD_PREVIEW=.esphome/ui-preview "$(uv tool dir)/esphome/bin/python" test_controller.py
+```
+
+The resulting `.esphome/ui-preview.png` uses host font rendering and full RGB colors; panel quantization and rasterization can differ.
+
 ## Build
 
 Tested configuration targets ESPHome 2026.10.0, Python 3.12, and ESP-IDF. Install with `uv tool install --python 3.12 esphome==2026.10.0`. Fonts download from Google Fonts during the first validation/build.
 
-Local `secrets.yaml` holds `wifi_ssid`, `wifi_password`, `api_key`, and `ota_password`. It was created from the existing Wi-Fi credentials with new API/OTA credentials and mode 0600. Do not publish secrets, factory dumps, build output, or firmware binaries: they can contain credentials. `.gitignore` excludes these; this directory is not currently a Git repository.
+Local `secrets.yaml` holds `wifi_ssid`, `wifi_password`, `api_key`, and `ota_password`. It was created from the existing Wi-Fi credentials with new API/OTA credentials and mode 0600. Do not publish secrets, factory dumps, build output, or firmware binaries: they can contain credentials. `.gitignore` excludes these. For another device, create your own `secrets.yaml` with those four keys and update the sensor and scene entity IDs in `lab-controller.yaml`. Generate a fresh API key with `openssl rand -base64 32` and an OTA password with `openssl rand -hex 24`.
 
 ```sh
 esphome config lab-controller.yaml
