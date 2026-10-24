@@ -1,0 +1,5 @@
+.esphome/
+secrets.yaml
+notes/credentials.yml
+factory_stuff/
+__pycache__/
