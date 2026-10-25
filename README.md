@@ -13,9 +13,11 @@ The initial MIPI SPI configuration produced scrambled pixels at both 90° and 27
 
 Readings come from `sensor.desk_temperature` and `sensor.desk_humidity`. Temperature uses the entity's `unit_of_measurement`: Fahrenheit is converted to Celsius; unknown units are not guessed. Unavailable readings show `--`. When no Home Assistant state subscriber is connected, both readings show `--` and the screen shows `HA offline`. Buttons send scene requests, not confirmations of the lights' state.
 
-## Rounded UI
+## Device UI
 
-The interface has two reading cards, larger readings, muted captions, rounded scene buttons, and lightbulb icons. Touch boxes and scene mappings are unchanged. A short white outline acknowledges a tap; it does not indicate the active scene or successful execution. The feedback script restarts on a new tap and clears the outline after 350 ms plus rendering time.
+The header shows “Lab” and a right-aligned 24-hour `HH:mm` clock. Home Assistant supplies time and timezone; `HA offline` takes precedence, and the clock stays blank until time is valid. The climate section has a black background, muted horizontal dividers at y=48 and y=149, captions at y=73, and readings at y=111.
+
+Scene controls use solid white, gold, and red bulb icons, plus a gray slashed bulb for the black scene. Labels and persistent button outlines are removed. Touch boxes remain 70×70 at y=160–229, and scene mappings are unchanged. A short white outline acknowledges a tap; it does not indicate the active scene or successful execution. The feedback script restarts on a new tap and clears the outline after 350 ms plus rendering time.
 
 Keep `color_palette: 8BIT`: an adaptive palette took about 2.6 seconds per redraw, and a 16-bit framebuffer failed allocation on this device. Both experiments were removed. The restored RGB332 mode reports no allocation failure, Home Assistant reconnects, and one observed redraw took 296 ms. Brent confirmed the rounded interface looks good and works on the device.
 
@@ -26,6 +28,8 @@ CYD_PREVIEW=.esphome/ui-preview "$(uv tool dir)/esphome/bin/python" test_control
 ```
 
 The resulting `.esphome/ui-preview.png` uses host font rendering and full RGB colors; panel quantization and rasterization can differ.
+
+`mockups/comparison.png` contains 17 labeled button studies; option 17 informed the current icons. Regenerate the mockups with `"$(uv tool dir)/esphome/bin/python" mockups/generate.py` (Pillow and macOS Arial required).
 
 ## Build
 
@@ -39,7 +43,7 @@ esphome config lab-controller.yaml
 esphome compile lab-controller.yaml
 ```
 
-The self-check executes the actual drawing lambda with a recording display and checks scene mappings, square touch areas, labels, colors, temperature conversion, invalid readings, and disconnected behavior. It does not test real hardware.
+The self-check executes the actual drawing lambda with a recording display and checks scene mappings, square touch areas, icon colors, climate dividers and spacing, temperature conversion, invalid readings, clock formatting and alignment, and offline-message priority. It does not test real hardware.
 
 ## Flash and connect
 
